@@ -1,6 +1,7 @@
 import datetime
 from collections import Counter
 import json
+import os
 
 class LottoStats:
     def __init__(self):
@@ -9,6 +10,9 @@ class LottoStats:
         self.Wygrane = []
         self.licz_wygrane = []
 
+        self.odczytaj_dane_Zaklady()
+        self.odczytaj_dane_Wygrane()
+
     def dodaj_dane_Zaklady(self):
         with open("dane_Zaklady.json", "w") as plik:
             json.dump(self.wczesZaklady, plik, indent=4)
@@ -16,10 +20,14 @@ class LottoStats:
     def odczytaj_dane_Zaklady(self):
         try:
             with open("dane_Zaklady.json", "r") as plik:
-                self.wczesZaklady = json.load(plik)
-                self.licz_zaklady = [
-                    tuple(int(n) for n in wpis.split("dodany")[0].strip("()").split(","))
-                    for wpis in self.wczesZaklady
+                if os.path.getsize("dane_Zaklady.json") == 0:
+                    self.wczesZaklady = []
+                else:
+                    with open("dane_Zaklady.json", "r") as plik:
+                        self.wczesZaklady = json.load(plik)
+                        self.licz_zaklady = [
+                            tuple(int(n) for n in wpis.split(" dodany ")[0].strip("()").split(","))
+                            for wpis in self.wczesZaklady
                 ]
         except FileNotFoundError:
             self.wczesZaklady = []
@@ -33,9 +41,13 @@ class LottoStats:
     def odczytaj_dane_Wygrane(self):
         try:
             with open("dane_Wygrane.json", "r") as plik:
-                self.Wygrane = json.load(plik)
-                self.licz_wygrane = [
-                    float(wpis.split("zł")[0]) for wpis in self.Wygrane
+                if os.path.getsize("dane_Wygrane.json") == 0:
+                    self.Wygrane = []
+                else:
+                    with open("dane_Wygrane.json", "r") as plik:
+                        self.Wygrane = json.load(plik)
+                        self.licz_wygrane = [
+                            float(wpis.split("zł")[0]) for wpis in self.Wygrane
                 ]
         except FileNotFoundError:
             self.Wygrane = []
@@ -73,8 +85,7 @@ class LottoStats:
             wpis = (f'{nowyZaklad} dodany {dataDodania}')
             self.wczesZaklady.append(wpis)
             self.licz_zaklady.append(nowyZaklad)
-            self.dodaj_dane_Zaklady
-            self.odczytaj_dane_Zaklady()
+            self.dodaj_dane_Zaklady()
             print("Pomyślnie dodano zakład do listy twoich zakładów.\n")
             break
 
@@ -101,7 +112,7 @@ class LottoStats:
             if doUsun in self.wczesZaklady:
                 self.wczesZaklady.remove(doUsun)
                 self.licz_zaklady.remove(usun)
-                self.odczytaj_dane_Zaklady()
+                self.dodaj_dane_Zaklady()
                 
                 print("Pomyślnie usunięto zakład z listy twoich zakładów.\n")
                 break
@@ -126,7 +137,6 @@ class LottoStats:
                 self.Wygrane.append(f'{wygrana}zł dodane {dataDodania}')
                 self.licz_wygrane.append(wygrana)
                 self.dodaj_dane_Wygrane()
-                self.odczytaj_dane_Wygrane()
                 print("Pomyślnie dodano wygraną do listy twoich wygranych.\n")
                 break
 
@@ -147,7 +157,7 @@ class LottoStats:
             if doUsun in self.Wygrane:
                 self.Wygrane.remove(doUsun)
                 self.licz_wygrane.remove(usun)
-                self.odczytaj_dane_Wygrane()
+                self.dodaj_dane_Wygrane()
                 print("Pomyślnie usunięto wygraną z listy twoich wygranych.\n")
                 break
             else:
@@ -172,8 +182,13 @@ class LottoStats:
                 continue
 
             razy = self.licz_zaklady.count(powtarza)
-            print(f'Zakład {powtarza} powtarza się {razy} razy.\n')
-            if razy >= 5:
+            if razy == 1:
+                print('Zakład się nie powtarza!\n')
+            elif razy < 1:
+                print('Jeszcze nie wprowadziłeś takiego zakładu. :(\n')
+            elif razy > 1:
+                print(f'Zakład {powtarza} powtarza się {razy} razy.\n')
+            elif razy >= 5:
                 print("Wow! Naprawdę musisz lubić te liczby. ;)\n")
             break
 

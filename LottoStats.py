@@ -1,4 +1,5 @@
 import loteriaModule
+import time
 
 staty = loteriaModule.LottoStats()
 
@@ -16,6 +17,7 @@ while __name__ == '__main__':
     staty.statystyki()
 
     while True:
+        time.sleep(1)
         print(f"Komendy (wpisz numerek jeżeli chcesz wykonać).\n{liOpcje}")
         wykonaj = str(input("Numer: ")).strip()
         if wykonaj not in dictOpcje:
